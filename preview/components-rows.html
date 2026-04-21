@@ -1,0 +1,33 @@
+<!doctype html><html><head><meta charset="utf-8"><title>List Rows</title><link rel="stylesheet" href="../colors_and_type.css"></head>
+<body class="poco" style="padding:20px 24px">
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <!-- Task row with checkbox + priority pill -->
+    <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:12px">
+      <div style="width:20px;height:20px;border-radius:999px;background:#0E0E10;display:grid;place-items:center">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div style="flex:1;font-weight:500">Review paper</div>
+      <span class="pill pill--priority">High</span>
+    </div>
+    <!-- Task row, unchecked + easy -->
+    <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:12px">
+      <div style="width:20px;height:20px;border-radius:999px;border:1.5px solid #9A9A9A"></div>
+      <div style="flex:1;font-weight:500">Organize tax document</div>
+      <span class="pill pill--easy">Easy</span>
+    </div>
+    <!-- In-progress row -->
+    <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:12px">
+      <div style="width:14px;height:14px;border-radius:999px;background:#6FA8DC;flex-shrink:0"></div>
+      <div style="flex:1">
+        <div style="font-weight:600">Organize tax documents</div>
+        <div class="small">Next: Download W-2 form</div>
+      </div>
+      <span class="pill pill--neutral">2/5 steps</span>
+    </div>
+    <!-- Numbered step row -->
+    <div style="padding:12px 14px;background:#F2F2F2;border-radius:12px;display:flex;align-items:center;gap:12px">
+      <div style="width:26px;height:26px;border-radius:999px;background:#D9D9D9;display:grid;place-items:center;font-size:13px;font-weight:600">2</div>
+      <div style="font-size:14px;color:#3A3A3D">Copy the key requirements into a note or document</div>
+    </div>
+  </div>
+</body></html>

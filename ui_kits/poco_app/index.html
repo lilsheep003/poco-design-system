@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Poco — Mobile App UI Kit</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../../colors_and_type.css">
+<style>
+  html, body { margin: 0; padding: 0; background: #ECECEC; min-height: 100vh; font-family: "PingFang SC", "Plus Jakarta Sans", system-ui, sans-serif; }
+  #stage { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+  .phone {
+    width: 390px; height: 780px;
+    border-radius: 44px; background: #fff;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.18), 0 0 0 10px #111, 0 0 0 11px #333;
+    overflow: hidden; position: relative;
+  }
+  .phone::before {
+    content: ''; position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
+    width: 126px; height: 36px; border-radius: 999px; background: #000; z-index: 60;
+  }
+  .status {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 70;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 26px 0; height: 22px;
+    font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-weight: 600; font-size: 15px; letter-spacing: 0.02em;
+    pointer-events: none;
+  }
+  .status-right {
+    display: flex; align-items: center; gap: 5px;
+  }
+  .status-right svg { display: block; }
+  .homebar {
+    position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+    width: 130px; height: 5px; border-radius: 999px; background: rgba(0,0,0,0.25); z-index: 70;
+  }
+  #root { position: absolute; inset: 0; }
+</style>
+</head>
+<body>
+  <div id="stage">
+    <div class="phone">
+      <div class="status">
+        <span>9:41</span>
+        <span class="status-right">
+          <svg width="17" height="12" viewBox="0 0 17 12" fill="none"><rect x="0" y="3" width="3" height="9" rx="1" fill="#0E0E10"/><rect x="4.5" y="2" width="3" height="10" rx="1" fill="#0E0E10"/><rect x="9" y="0" width="3" height="12" rx="1" fill="#0E0E10"/><rect x="13.5" y="0" width="3" height="12" rx="1" fill="#D1D1D6"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M8 3.6C9.8 3.6 11.4 4.3 12.6 5.4L14 4C12.4 2.5 10.3 1.5 8 1.5S3.6 2.5 2 4L3.4 5.4C4.6 4.3 6.2 3.6 8 3.6Z" fill="#0E0E10"/><path d="M8 7.2C9 7.2 9.9 7.6 10.6 8.2L12 6.8C10.9 5.8 9.5 5.2 8 5.2S5.1 5.8 4 6.8L5.4 8.2C6.1 7.6 7 7.2 8 7.2Z" fill="#0E0E10"/><circle cx="8" cy="10.5" r="1.5" fill="#0E0E10"/></svg>
+          <svg width="27" height="13" viewBox="0 0 27 13" fill="none"><rect x="0.5" y="0.5" width="23" height="12" rx="3.5" stroke="#0E0E10" stroke-opacity="0.35"/><rect x="2" y="2" width="18" height="9" rx="2" fill="#0E0E10"/><path d="M25 4.5V8.5C25.8 8.2 26.5 7.2 26.5 6.5S25.8 4.8 25 4.5Z" fill="#0E0E10" fill-opacity="0.4"/></svg>
+        </span>
+      </div>
+      <div id="root"></div>
+      <div class="homebar"></div>
+    </div>
+  </div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="Primitives.jsx"></script>
+<script type="text/babel" src="Store.jsx"></script>
+<script type="text/babel" src="HomeScreen.jsx"></script>
+<script type="text/babel" src="TaskScreen.jsx"></script>
+<script type="text/babel" src="MoodScreen.jsx"></script>
+<script type="text/babel" src="FocusScreen.jsx"></script>
+<script type="text/babel" src="BreakdownEngine.jsx"></script>
+<script type="text/babel" src="BreakdownScreen.jsx"></script>
+<script type="text/babel" src="MindDropScreen.jsx"></script>
+<script type="text/babel" src="PlanningScreen.jsx"></script>
+<script type="text/babel" src="MeScreen.jsx"></script>
+
+<script type="text/babel">
+function App() {
+  const [tab, setTab] = React.useState('home');
+  const [flow, setFlow] = React.useState(null);
+  const [breakdownSeed, setBreakdownSeed] = React.useState(null);
+  const [focusQuick, setFocusQuick] = React.useState(false);
+
+  const openFocus = (quick = false) => { setFocusQuick(quick); setFlow('focus'); };
+  const openBreakdown = (seed = null) => { setBreakdownSeed(seed); setFlow('breakdown'); };
+
+  const openMindDrop = () => setFlow('minddrop');
+  const openPlanning = () => setFlow('planning');
+
+  const screen = () => {
+    if (flow === 'focus') return <FocusScreen quickStart={focusQuick} onDone={() => { setFlow(null); setTab('home'); }} />;
+    if (flow === 'breakdown') return <BreakdownScreen initialTitle={breakdownSeed} onDone={() => { setFlow(null); setTab('task'); }} onStartFocus={() => { setFlow('focus'); setFocusQuick(false); }} />;
+    if (flow === 'minddrop') return <MindDropScreen onDone={() => { setFlow(null); setTab('task'); }} onOpenBreakdown={(seed) => { setBreakdownSeed(seed); setFlow('breakdown'); }} />;
+    if (flow === 'planning') return <PlanningScreen onDone={() => { setFlow(null); setTab('task'); }} />;
+
+    if (tab === 'home') return <HomeScreen
+      onOpenFocus={() => openFocus(true)}
+      onOpenTask={() => setTab('task')}
+      onOpenMood={() => setTab('mood')}
+      onOpenBreakdown={() => openBreakdown()}
+      onOpenMe={() => setTab('me')}
+    />;
+    if (tab === 'task') return <TaskScreen onOpenBreakdown={(seed) => openBreakdown(seed)} onOpenFocus={() => openFocus()} onOpenMindDrop={openMindDrop} onOpenPlanning={openPlanning} />;
+    if (tab === 'focus') return <FocusScreen onDone={() => setTab('home')} />;
+    if (tab === 'mood') return <MoodScreen onSubmit={() => setTab('home')} />;
+    if (tab === 'me') return <MeScreen />;
+    return null;
+  };
+
+  return (
+    <StoreProvider>
+      <div style={{ height: '100%', position: 'relative', background: '#fff' }}>
+        {screen()}
+        {!flow && <PTabBar active={tab} onChange={(t) => { setTab(t); }} />}
+      </div>
+    </StoreProvider>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

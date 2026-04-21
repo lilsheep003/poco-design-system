@@ -1,0 +1,211 @@
+/* =============================================================
+   Poco Design System — Colors & Type
+   ============================================================= */
+
+/* Primary face: PingFang SC (system-installed on Apple). Fallbacks cover other platforms. */
+
+:root {
+  /* ---------- Colors: Surfaces ---------- */
+  --poco-page:        #FFFFFF;   /* page background */
+  --poco-surface-1:   #F2F2F2;   /* default card fill */
+  --poco-surface-2:   #E8E8E8;   /* pressed / hover card */
+  --poco-surface-3:   #D9D9D9;   /* subtle filled button, chip active */
+  --poco-surface-4:   #8A8A8A;   /* secondary solid button (mid-gray) */
+  --poco-overlay:     rgba(14, 14, 16, 0.40);
+
+  /* ---------- Colors: Ink ---------- */
+  --poco-ink:         #0E0E10;   /* primary text, primary icon */
+  --poco-ink-2:       #3A3A3D;   /* body on gray */
+  --poco-ink-3:       #6B6B6B;   /* supporting copy */
+  --poco-ink-4:       #9A9A9A;   /* hints, placeholder */
+  --poco-ink-5:       #B8B8B8;   /* disabled, inactive tab */
+  --poco-ink-on-dark: #FFFFFF;   /* text on --poco-ink or --poco-surface-4 */
+
+  /* ---------- Colors: Lines ---------- */
+  --poco-line:        #E5E5E5;   /* card borders, dividers */
+  --poco-line-strong: #C9C9C9;   /* chip borders, input borders */
+  --poco-line-hair:   #EDEDED;   /* tab bar top border */
+
+  /* ---------- Colors: Status (whispers) ---------- */
+  --poco-status-priority-bg:  #F7C4C4;   /* High priority pill (coral-pink) */
+  --poco-status-priority-ink: #8C2A2A;
+  --poco-status-easy-bg:      #BCE5B9;   /* Easy / low-effort pill (sage) */
+  --poco-status-easy-ink:     #2C5A29;
+  --poco-status-progress:     #6FA8DC;   /* in-progress dot (muted blue) */
+
+  /* ---------- Colors: Warm accent ---------- */
+  --poco-warm-cream:  #FCEBD8;   /* Mochi tile background */
+  --poco-warm-peach:  #F4C4A8;   /* Mochi blush */
+
+  /* ---------- Typography ---------- */
+  --poco-font-sans: "PingFang SC", "PingFang TC", "PingFang HK", -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", "Plus Jakarta Sans", system-ui, sans-serif;
+  --poco-font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Type scale */
+  --poco-fs-display: 34px;   --poco-lh-display: 1.12;
+  --poco-fs-h1:      26px;   --poco-lh-h1:      1.20;
+  --poco-fs-h2:      20px;   --poco-lh-h2:      1.25;
+  --poco-fs-h3:      17px;   --poco-lh-h3:      1.30;
+  --poco-fs-body:    15px;   --poco-lh-body:    1.45;
+  --poco-fs-small:   13px;   --poco-lh-small:   1.40;
+  --poco-fs-micro:   11px;   --poco-lh-micro:   1.30;
+  --poco-fs-button:  15px;
+
+  --poco-fw-reg: 400;
+  --poco-fw-med: 500;
+  --poco-fw-sem: 600;
+  --poco-fw-bld: 700;
+  --poco-fw-xbd: 800;
+
+  /* ---------- Spacing scale ---------- */
+  --poco-s-1:   4px;
+  --poco-s-2:   8px;
+  --poco-s-3:  12px;
+  --poco-s-4:  16px;
+  --poco-s-5:  20px;
+  --poco-s-6:  24px;
+  --poco-s-8:  32px;
+  --poco-s-10: 40px;
+  --poco-s-12: 48px;
+
+  /* ---------- Radii ---------- */
+  --poco-r-sm:  8px;
+  --poco-r-md:  12px;   /* chips, inputs, list rows */
+  --poco-r-lg:  16px;   /* cards */
+  --poco-r-xl:  20px;   /* grouped panels */
+  --poco-r-2xl: 24px;   /* large CTAs */
+  --poco-r-pill: 999px; /* pill buttons */
+
+  /* ---------- Shadows (very soft, rarely used) ---------- */
+  --poco-shadow-none: none;
+  --poco-shadow-tab:  0 -1px 0 var(--poco-line-hair);
+  --poco-shadow-pop:  0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06);
+
+  /* ---------- Motion ---------- */
+  --poco-ease:       cubic-bezier(0.22, 0.61, 0.36, 1);
+  --poco-dur-fast:   120ms;
+  --poco-dur-med:    200ms;
+  --poco-dur-slow:   320ms;
+}
+
+/* ============================================================
+   Semantic element defaults — apply to a .poco scope or <body>
+   ============================================================ */
+
+.poco, .poco * { box-sizing: border-box; }
+
+.poco {
+  font-family: var(--poco-font-sans);
+  color: var(--poco-ink);
+  background: var(--poco-page);
+  font-size: var(--poco-fs-body);
+  line-height: var(--poco-lh-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.poco h1, .poco .h1-display {
+  font-size: var(--poco-fs-display);
+  line-height: var(--poco-lh-display);
+  font-weight: var(--poco-fw-bld);
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+.poco h2, .poco .h1 {
+  font-size: var(--poco-fs-h1);
+  line-height: var(--poco-lh-h1);
+  font-weight: var(--poco-fw-bld);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.poco h3, .poco .h2 {
+  font-size: var(--poco-fs-h2);
+  line-height: var(--poco-lh-h2);
+  font-weight: var(--poco-fw-bld);
+  margin: 0;
+}
+.poco h4, .poco .h3 {
+  font-size: var(--poco-fs-h3);
+  line-height: var(--poco-lh-h3);
+  font-weight: var(--poco-fw-bld);
+  margin: 0;
+}
+
+.poco p, .poco .body {
+  font-size: var(--poco-fs-body);
+  line-height: var(--poco-lh-body);
+  font-weight: var(--poco-fw-reg);
+  color: var(--poco-ink-2);
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.poco .small   { font-size: var(--poco-fs-small); line-height: var(--poco-lh-small); color: var(--poco-ink-3); }
+.poco .micro   { font-size: var(--poco-fs-micro); line-height: var(--poco-lh-micro); color: var(--poco-ink-3); letter-spacing: 0.02em; }
+.poco .hint    { font-size: var(--poco-fs-small); color: var(--poco-ink-4); }
+.poco .meta    { font-size: var(--poco-fs-small); color: var(--poco-ink-3); font-weight: var(--poco-fw-med); }
+
+.poco .strong  { font-weight: var(--poco-fw-bld); color: var(--poco-ink); }
+.poco .subtle  { color: var(--poco-ink-3); }
+.poco .faint   { color: var(--poco-ink-4); }
+
+/* Utility: cards, chips, pills */
+.poco .card {
+  background: var(--poco-surface-1);
+  border-radius: var(--poco-r-xl);
+  padding: var(--poco-s-5);
+}
+.poco .card--flat {
+  background: var(--poco-page);
+  border: 1px solid var(--poco-line);
+  border-radius: var(--poco-r-lg);
+  padding: var(--poco-s-4);
+}
+.poco .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--poco-s-2);
+  padding: 8px 14px;
+  border-radius: var(--poco-r-pill);
+  background: var(--poco-page);
+  border: 1px solid var(--poco-line-strong);
+  color: var(--poco-ink);
+  font-size: var(--poco-fs-body);
+  font-weight: var(--poco-fw-med);
+}
+.poco .pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--poco-r-pill);
+  font-size: var(--poco-fs-small);
+  font-weight: var(--poco-fw-sem);
+}
+.poco .pill--priority { background: var(--poco-status-priority-bg); color: var(--poco-status-priority-ink); }
+.poco .pill--easy     { background: var(--poco-status-easy-bg);     color: var(--poco-status-easy-ink);     }
+.poco .pill--neutral  { background: var(--poco-surface-3);          color: var(--poco-ink);                 }
+
+/* Buttons */
+.poco .btn {
+  appearance: none;
+  border: 0;
+  font-family: inherit;
+  font-size: var(--poco-fs-button);
+  font-weight: var(--poco-fw-sem);
+  padding: 14px 20px;
+  border-radius: var(--poco-r-pill);
+  cursor: pointer;
+  transition: background-color var(--poco-dur-fast) var(--poco-ease),
+              transform var(--poco-dur-fast) var(--poco-ease),
+              opacity var(--poco-dur-fast) var(--poco-ease);
+}
+.poco .btn--primary  { background: var(--poco-ink);          color: var(--poco-ink-on-dark); }
+.poco .btn--secondary{ background: var(--poco-surface-4);    color: var(--poco-ink-on-dark); }
+.poco .btn--soft     { background: var(--poco-surface-3);    color: var(--poco-ink); }
+.poco .btn--ghost    { background: transparent;              color: var(--poco-ink); }
+.poco .btn--light    { background: var(--poco-page);         color: var(--poco-ink); box-shadow: inset 0 0 0 1px var(--poco-line); }
+
+.poco .btn:hover  { filter: brightness(0.96); }
+.poco .btn:active { transform: scale(0.97); }
+.poco .btn:focus-visible { outline: 2px solid var(--poco-ink); outline-offset: 2px; }

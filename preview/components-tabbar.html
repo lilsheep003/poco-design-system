@@ -1,0 +1,30 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Bottom Tab Bar</title><link rel="stylesheet" href="../colors_and_type.css"></head>
+<body class="poco" style="padding:0;margin:0;background:#fff">
+  <style>
+    .tab { display:flex; flex-direction:column; align-items:center; gap:4px; flex:1; padding:10px 0; font-size:11px; color:#9A9A9A; font-weight:500;}
+    .tab.active { color:#0E0E10; }
+    .tab svg { stroke: currentColor; }
+  </style>
+  <div style="max-width:420px;margin:40px auto 0;border:1px solid #EDEDED;border-radius:24px;padding:6px 10px;background:#fff;display:flex;align-items:stretch;box-shadow:0 1px 2px rgba(0,0,0,.04)">
+    <div class="tab active">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      <div>Home</div>
+    </div>
+    <div class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
+      <div>Task</div>
+    </div>
+    <div class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+      <div>Focus</div>
+    </div>
+    <div class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+      <div>Mood</div>
+    </div>
+    <div class="tab">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
+      <div>Me</div>
+    </div>
+  </div>
+</body></html>
