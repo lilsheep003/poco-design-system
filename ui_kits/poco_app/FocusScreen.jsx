@@ -33,8 +33,11 @@ const MOCHI_MILESTONES = [
   { at: 60, line: "A whole hour! You're unstoppable!" },
 ];
 
+window._mochiMuted = false;
+
 function mochiSpeak(text) {
   try {
+    if (window._mochiMuted) return;
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
@@ -163,6 +166,7 @@ function FocusRunning({ intention, env, duration, mode, onEnd }) {
   const [eventLog, setEventLog] = React.useState([]);
   const [fadeIn, setFadeIn] = React.useState(false);
   const [milestoneMsg, setMilestoneMsg] = React.useState(null);
+  const [muted, setMuted] = React.useState(false);
   const usedEvents = React.useRef(new Set());
   const firedMilestones = React.useRef(new Set());
   const started = React.useRef(Date.now());
@@ -257,6 +261,13 @@ function FocusRunning({ intention, env, duration, mode, onEnd }) {
     onEnd(duration - remaining, false, eventLogRef.current);
   };
 
+  const toggleMute = () => {
+    const next = !muted;
+    setMuted(next);
+    window._mochiMuted = next;
+    if (next) try { window.speechSynthesis.cancel(); } catch (_) {}
+  };
+
   const handleScreenTap = (e) => {
     if (e.target.closest('button') || e.target.closest('[data-no-tap]')) return;
     triggerEvent();
@@ -265,7 +276,10 @@ function FocusRunning({ intention, env, duration, mode, onEnd }) {
   return (
     <PScreen style={{ background: P_COLORS.warmCream }} onClick={handleScreenTap}>
       <PHeader title="In focus" sub={intention || 'No intention set'}
-        right={<div data-no-tap onClick={handleStop} style={{ cursor: 'pointer' }}><PIcon name="x" size={22} /></div>} />
+        right={<>
+          <div data-no-tap onClick={toggleMute} style={{ cursor: 'pointer', opacity: muted ? 0.4 : 1, transition: 'opacity 150ms' }}><PIcon name={muted ? 'volume-x' : 'volume'} size={22} /></div>
+          <div data-no-tap onClick={handleStop} style={{ cursor: 'pointer' }}><PIcon name="x" size={22} /></div>
+        </>} />
 
       {/* timer ring */}
       <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 0 4px' }}>
