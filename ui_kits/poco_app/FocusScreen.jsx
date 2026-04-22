@@ -342,9 +342,19 @@ function FocusRunning({ intention, env, duration, mode, onEnd }) {
       )}
 
       {/* controls */}
-      <div style={{ padding: '0 20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        <PButton variant="light" onClick={() => setPaused(p => !p)}>{paused ? 'Resume' : 'Pause'}</PButton>
-        <PButton variant="primary" onClick={handleStop}>Stop</PButton>
+      <div style={{ padding: '0 20px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div data-no-tap onClick={toggleMute} style={{
+          width: 48, height: 48, borderRadius: '50%', flexShrink: 0,
+          background: muted ? P_COLORS.ink : P_COLORS.surface1,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer', transition: 'background 150ms',
+        }}>
+          <PIcon name={muted ? 'volume-x' : 'volume'} size={20} stroke={muted ? '#fff' : P_COLORS.ink} />
+        </div>
+        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <PButton variant="light" onClick={() => setPaused(p => !p)}>{paused ? 'Resume' : 'Pause'}</PButton>
+          <PButton variant="primary" onClick={handleStop}>Stop</PButton>
+        </div>
       </div>
 
       {/* inline keyframes for bounce animation */}
