@@ -38,12 +38,13 @@ function mochiSpeak(text) {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.rate = 0.92;
-    u.pitch = 1.3;
-    u.volume = 0.7;
+    u.rate = 1.15;
+    u.pitch = 1.85;
+    u.volume = 0.75;
     const voices = window.speechSynthesis.getVoices();
-    const preferred = voices.find(v => v.lang.startsWith('en') && v.name.includes('Female'))
-      || voices.find(v => v.lang.startsWith('en') && /samantha|karen|victoria|zira/i.test(v.name))
+    const preferred = voices.find(v => /zira/i.test(v.name))
+      || voices.find(v => v.lang.startsWith('en') && /samantha|karen|victoria|female/i.test(v.name))
+      || voices.find(v => v.lang.startsWith('en-') && v.name.includes('Female'))
       || voices.find(v => v.lang.startsWith('en'));
     if (preferred) u.voice = preferred;
     window.speechSynthesis.speak(u);
@@ -209,34 +210,43 @@ function FocusRunning({ intention, env, duration, mode, onEnd }) {
     }
   }, [elapsedMin, paused]);
 
+  const triggerEvent = React.useCallback(() => {
+    if (currentEvent) return;
+    const available = MOCHI_EVENTS.filter((_, i) => !usedEvents.current.has(i));
+    const pool = available.length > 0 ? available : MOCHI_EVENTS;
+    const idx = MOCHI_EVENTS.indexOf(pool[Math.floor(Math.random() * pool.length)]);
+    usedEvents.current.add(idx);
+    const ev = MOCHI_EVENTS[idx];
+
+    const logEntry = { ...ev, minute: Math.round((Date.now() - started.current) / 60000) };
+    setEventLog(prev => [...prev, logEntry]);
+    setCurrentEvent(ev);
+    setFadeIn(true);
+
+    setTimeout(() => mochiSpeak(ev.text + '. ' + ev.sound), 400);
+    setTimeout(() => { setFadeIn(false); }, 7000);
+    setTimeout(() => { setCurrentEvent(null); }, 7800);
+  }, [currentEvent]);
+
   // random Mochi events — first at ~2min, then every ~3-5 min
   React.useEffect(() => {
     if (paused) return;
     const firstDelay = 90000 + Math.random() * 30000;
-    let timeout = setTimeout(fireEvent, firstDelay);
+    let timeout = setTimeout(() => {
+      triggerEvent();
+      schedule();
+    }, firstDelay);
 
-    function fireEvent() {
-      const available = MOCHI_EVENTS.filter((_, i) => !usedEvents.current.has(i));
-      const pool = available.length > 0 ? available : MOCHI_EVENTS;
-      const idx = MOCHI_EVENTS.indexOf(pool[Math.floor(Math.random() * pool.length)]);
-      usedEvents.current.add(idx);
-      const ev = MOCHI_EVENTS[idx];
-
-      const logEntry = { ...ev, minute: Math.round((Date.now() - started.current) / 60000) };
-      setEventLog(prev => [...prev, logEntry]);
-      setCurrentEvent(ev);
-      setFadeIn(true);
-
-      setTimeout(() => mochiSpeak(ev.text + '. ' + ev.sound), 400);
-      setTimeout(() => { setFadeIn(false); }, 7000);
-      setTimeout(() => { setCurrentEvent(null); }, 7800);
-
+    function schedule() {
       const next = 180000 + Math.random() * 120000;
-      timeout = setTimeout(fireEvent, next);
+      timeout = setTimeout(() => {
+        triggerEvent();
+        schedule();
+      }, next);
     }
 
     return () => clearTimeout(timeout);
-  }, [paused]);
+  }, [paused, triggerEvent]);
 
   const mm = String(Math.floor(remaining / 60)).padStart(2, '0');
   const ss = String(remaining % 60).padStart(2, '0');
@@ -247,10 +257,15 @@ function FocusRunning({ intention, env, duration, mode, onEnd }) {
     onEnd(duration - remaining, false, eventLogRef.current);
   };
 
+  const handleScreenTap = (e) => {
+    if (e.target.closest('button') || e.target.closest('[data-no-tap]')) return;
+    triggerEvent();
+  };
+
   return (
-    <PScreen style={{ background: P_COLORS.warmCream }}>
+    <PScreen style={{ background: P_COLORS.warmCream }} onClick={handleScreenTap}>
       <PHeader title="In focus" sub={intention || 'No intention set'}
-        right={<div onClick={handleStop} style={{ cursor: 'pointer' }}><PIcon name="x" size={22} /></div>} />
+        right={<div data-no-tap onClick={handleStop} style={{ cursor: 'pointer' }}><PIcon name="x" size={22} /></div>} />
 
       {/* timer ring */}
       <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 0 4px' }}>

@@ -171,14 +171,15 @@ function PTabBar({ active, onChange }) {
   );
 }
 
-function PScreen({ children, noTab = false }) {
+function PScreen({ children, noTab = false, style = {}, onClick }) {
   return (
-    <div style={{
+    <div onClick={onClick} style={{
       position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
       overflowY: 'auto', WebkitOverflowScrolling: 'touch',
       paddingTop: 44,
       paddingBottom: noTab ? 34 : 120,
       fontFamily: P_FONT, color: P_COLORS.ink, background: P_COLORS.page,
+      ...style,
     }}>{children}</div>
   );
 }
