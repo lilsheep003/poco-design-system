@@ -2,7 +2,7 @@
 
 const miniBtn = { border: 0, background: 'transparent', color: '#9A9A9A', width: 22, height: 22, borderRadius: 6, cursor: 'pointer', fontSize: 14 };
 
-function BreakdownScreen({ initialTitle, onDone, onStartFocus }) {
+function BreakdownScreen({ initialTitle, initialPriority='medium', onDone, onStartFocus }) {
   const { addTaskFull } = useStore();
   const [step, setStep] = React.useState(1);
   const [title, setTitle] = React.useState(initialTitle || '');
@@ -19,6 +19,7 @@ function BreakdownScreen({ initialTitle, onDone, onStartFocus }) {
     const clean = generatedSteps.filter(s => s.text.trim());
     addTaskFull({
       title: title.trim() || 'Untitled',
+      priority: normalizeEffort(initialPriority),
       friction,
       source: 'ai-assisted',
       subtasks: clean.map(s => ({ id: uid(), text: s.text.trim(), done: false })),

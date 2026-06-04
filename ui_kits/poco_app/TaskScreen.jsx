@@ -113,7 +113,6 @@ function TaskScreen({ onOpenBreakdown, onOpenFocus, onOpenMindDrop, onOpenPlanni
               onMove={(dir) => moveTask(t.id, dir)}
               onDelete={() => { deleteTask(t.id); if (expandedId === t.id) setExpandedId(null); }}
               onToggleSubtask={(subtask) => updateSubtask(t.id, subtask.id, { done: !subtask.done })}
-              onChangeEffort={(effort) => updateTask(t.id, { priority: effort })}
             />
           ))}
         </PCard>
@@ -136,7 +135,6 @@ function TaskRow({
   onMove,
   onDelete,
   onToggleSubtask,
-  onChangeEffort,
 }) {
   const subtasks = Array.isArray(task.subtasks) ? task.subtasks : [];
   const hasSubtasks = subtasks.length > 0;
@@ -159,7 +157,7 @@ function TaskRow({
             </div>
           )}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-            <EffortSelect value={normalizeEffort(task.priority)} onChange={onChangeEffort} />
+            <PPill kind={effortPillKind(task.priority)}>{effortLabel(task.priority)}</PPill>
             {task.today && !task.done && <span style={{ fontSize: 11, color: P_COLORS.progress }}>today</span>}
           </div>
         </div>
@@ -234,32 +232,6 @@ function TaskRow({
         </div>
       )}
     </div>
-  );
-}
-
-function EffortSelect({ value, onChange }) {
-  return (
-    <select
-      value={value}
-      onChange={e => onChange(e.target.value)}
-      aria-label="Task effort"
-      style={{
-        border: `1px solid ${P_COLORS.lineStrong}`,
-        background: P_COLORS.page,
-        color: P_COLORS.ink2,
-        borderRadius: 999,
-        padding: '3px 8px',
-        fontFamily: P_FONT,
-        fontSize: 11,
-        fontWeight: 700,
-        outline: 'none',
-        cursor: 'pointer',
-      }}
-    >
-      {EFFORT_LEVELS.map(level => (
-        <option key={level.id} value={level.id}>{level.label}</option>
-      ))}
-    </select>
   );
 }
 

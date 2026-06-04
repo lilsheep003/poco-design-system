@@ -1,7 +1,7 @@
 // Mind Drop — a low-pressure inbox for captured thoughts.
 
 function MindDropScreen({ onDone, onOpenBreakdown }) {
-  const { state, deleteMindDrop, convertDropToTask } = useStore();
+  const { state, deleteMindDrop, convertDropToTask, updateMindDrop } = useStore();
   const drops = state.mindDrops;
 
   const timeAgo = (ts) => {
@@ -39,13 +39,17 @@ function MindDropScreen({ onDone, onOpenBreakdown }) {
             <div style={{ fontSize: 12, color: P_COLORS.ink4, marginBottom: 14 }}>
               {timeAgo(drop.createdAt)}
             </div>
+            <EffortTagPicker
+              value={normalizeEffort(drop.priority)}
+              onChange={(priority) => updateMindDrop(drop.id, { priority })}
+            />
             <div style={{ display: 'flex', gap: 8 }}>
               <PButton variant="light" style={{ padding: '8px 12px', fontSize: 13, flex: 1 }}
                 onClick={() => convertDropToTask(drop.id)}>
                 Add to tasks
               </PButton>
               <PButton variant="soft" style={{ padding: '8px 12px', fontSize: 13, flex: 1 }}
-                onClick={() => { onOpenBreakdown(drop.text); deleteMindDrop(drop.id); }}>
+                onClick={() => { onOpenBreakdown({ title: drop.text, priority: normalizeEffort(drop.priority) }); deleteMindDrop(drop.id); }}>
                 Break it down
               </PButton>
               <button onClick={() => deleteMindDrop(drop.id)}
@@ -63,6 +67,35 @@ function MindDropScreen({ onDone, onOpenBreakdown }) {
         </div>
       </PSection>
     </PScreen>
+  );
+}
+
+function EffortTagPicker({ value, onChange }) {
+  return (
+    <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
+      {EFFORT_LEVELS.map(level => {
+        const active = normalizeEffort(value) === level.id;
+        return (
+          <button
+            key={level.id}
+            onClick={() => onChange(level.id)}
+            style={{
+              border: `1px solid ${active ? P_COLORS.ink : P_COLORS.lineStrong}`,
+              background: active ? P_COLORS[`${level.pill}Bg`] : P_COLORS.page,
+              color: active ? P_COLORS[`${level.pill}Ink`] : P_COLORS.ink3,
+              borderRadius: 999,
+              padding: '6px 10px',
+              fontFamily: P_FONT,
+              fontSize: 12,
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}
+          >
+            {level.label}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 

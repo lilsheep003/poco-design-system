@@ -77,13 +77,15 @@ function App() {
 
   const openFocus = (quick = false) => { setFocusQuick(quick); setFlow('focus'); };
   const openBreakdown = (seed = null) => { setBreakdownSeed(seed); setFlow('breakdown'); };
+  const breakdownTitle = typeof breakdownSeed === 'object' && breakdownSeed ? breakdownSeed.title : breakdownSeed;
+  const breakdownPriority = typeof breakdownSeed === 'object' && breakdownSeed ? breakdownSeed.priority : 'medium';
 
   const openMindDrop = () => setFlow('minddrop');
   const openPlanning = () => setFlow('planning');
 
   const screen = () => {
     if (flow === 'focus') return <FocusScreen quickStart={focusQuick} onDone={() => { setFlow(null); setTab('home'); }} />;
-    if (flow === 'breakdown') return <BreakdownScreen initialTitle={breakdownSeed} onDone={() => { setFlow(null); setTab('task'); }} onStartFocus={() => { setFlow('focus'); setFocusQuick(false); }} />;
+    if (flow === 'breakdown') return <BreakdownScreen initialTitle={breakdownTitle} initialPriority={breakdownPriority} onDone={() => { setFlow(null); setTab('task'); }} onStartFocus={() => { setFlow('focus'); setFocusQuick(false); }} />;
     if (flow === 'minddrop') return <MindDropScreen onDone={() => { setFlow(null); setTab('task'); }} onOpenBreakdown={(seed) => { setBreakdownSeed(seed); setFlow('breakdown'); }} />;
     if (flow === 'planning') return <PlanningScreen onDone={() => { setFlow(null); setTab('task'); }} />;
 

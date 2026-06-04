@@ -64,9 +64,9 @@ function makeInitialStore() {
         ] },
     ],
     mindDrops: [
-      { id: uid(), text: 'Maybe I should start journaling again', createdAt: Date.now() - 86400_000 },
-      { id: uid(), text: 'Check if library book is due this week', createdAt: Date.now() - 7200_000 },
-      { id: uid(), text: 'Look into that focus app Sara mentioned', createdAt: Date.now() - 1800_000 },
+      { id: uid(), text: 'Maybe I should start journaling again', priority: 'easy', createdAt: Date.now() - 86400_000 },
+      { id: uid(), text: 'Check if library book is due this week', priority: 'medium', createdAt: Date.now() - 7200_000 },
+      { id: uid(), text: 'Look into that focus app Sara mentioned', priority: 'hard', createdAt: Date.now() - 1800_000 },
     ],
     mood: { mood: 'Calm', energy: 'Medium', focus: 'Maybe' },
     // mood history: { date: 'YYYY-MM-DD', mood, energy, focus }
@@ -157,7 +157,8 @@ function StoreProvider({ children }) {
     }) })),
 
     // MIND DROPS
-    addMindDrop: (text) => setS(p => ({ ...p, mindDrops: [{ id: uid(), text, createdAt: Date.now() }, ...p.mindDrops] })),
+    addMindDrop: (text, priority='medium') => setS(p => ({ ...p, mindDrops: [{ id: uid(), text, priority: normalizeEffort(priority), createdAt: Date.now() }, ...p.mindDrops] })),
+    updateMindDrop: (id, patch) => setS(p => ({ ...p, mindDrops: p.mindDrops.map(d => d.id === id ? { ...d, ...patch, priority: patch.priority ? normalizeEffort(patch.priority) : d.priority } : d) })),
     deleteMindDrop: (id) => setS(p => ({ ...p, mindDrops: p.mindDrops.filter(d => d.id !== id) })),
     convertDropToTask: (id) => setS(p => {
       const drop = p.mindDrops.find(d => d.id === id);
@@ -165,7 +166,7 @@ function StoreProvider({ children }) {
       return {
         ...p,
         mindDrops: p.mindDrops.filter(d => d.id !== id),
-        tasks: [{ id: uid(), title: drop.text, done: false, priority: 'medium', subtasks: [], friction: null, today: false }, ...p.tasks],
+        tasks: [{ id: uid(), title: drop.text, done: false, priority: normalizeEffort(drop.priority), subtasks: [], friction: null, today: false }, ...p.tasks],
       };
     }),
 

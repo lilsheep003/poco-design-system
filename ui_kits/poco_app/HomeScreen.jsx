@@ -35,7 +35,10 @@ function HomeScreen({ onOpenFocus, onOpenTask, onOpenMood, onOpenBreakdown, onOp
       {suggested && (
         <PSection title="Suggested start">
           <PCard>
-            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>{suggested.title}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <div style={{ flex: 1, fontSize: 16, fontWeight: 700 }}>{suggested.title}</div>
+              <PPill kind={effortPillKind(suggested.priority)}>{effortLabel(suggested.priority)}</PPill>
+            </div>
             {smallestStep && (
               <div style={{ background: P_COLORS.page, border: `1px solid ${P_COLORS.line}`, borderRadius: 14, padding: '14px 16px', marginBottom: 14 }}>
                 <div style={{ fontSize: 13, color: P_COLORS.ink3, marginBottom: 4 }}>Smallest next step</div>
