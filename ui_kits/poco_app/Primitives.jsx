@@ -13,6 +13,8 @@ const P_COLORS = {
   line: '#E5E5E5',
   lineStrong: '#C9C9C9',
   priorityBg: '#F7C4C4', priorityInk: '#8C2A2A',
+  hardBg: '#F7C4C4', hardInk: '#8C2A2A',
+  mediumBg: '#F7E4B2', mediumInk: '#665016',
   easyBg: '#BCE5B9', easyInk: '#2C5A29',
   progress: '#6FA8DC',
   warmCream: '#FCEBD8',
@@ -111,6 +113,8 @@ function PChip({ children, active = false, onClick, style = {} }) {
 function PPill({ kind = 'neutral', children }) {
   const kinds = {
     priority: { background: P_COLORS.priorityBg, color: P_COLORS.priorityInk },
+    hard:     { background: P_COLORS.hardBg,     color: P_COLORS.hardInk },
+    medium:   { background: P_COLORS.mediumBg,   color: P_COLORS.mediumInk },
     easy:     { background: P_COLORS.easyBg,     color: P_COLORS.easyInk },
     neutral:  { background: P_COLORS.surface3,   color: P_COLORS.ink },
   };

@@ -2,8 +2,9 @@
 
 function HomeScreen({ onOpenFocus, onOpenTask, onOpenMood, onOpenBreakdown, onOpenMe }) {
   const { state } = useStore();
-  const todayTasks = state.tasks.slice(0, 4);
-  const suggested = state.tasks.find(t => !t.done && t.subtasks.length > 0) || state.tasks.find(t => !t.done);
+  const orderedTasks = sortTasksForEnergy(state.tasks, state.mood.energy);
+  const todayTasks = orderedTasks.slice(0, 4);
+  const suggested = orderedTasks.find(t => !t.done && t.subtasks.length > 0) || orderedTasks.find(t => !t.done);
   const smallestStep = suggested?.subtasks?.find(s => !s.done);
 
   return (
@@ -56,8 +57,7 @@ function HomeScreen({ onOpenFocus, onOpenTask, onOpenMood, onOpenBreakdown, onOp
             <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderBottom: i < todayTasks.length - 1 ? `1px solid ${P_COLORS.line}` : 'none' }}>
               <CheckDot done={t.done} />
               <div style={{ flex: 1, fontSize: 14, fontWeight: 500, textDecoration: t.done ? 'line-through' : 'none', color: t.done ? P_COLORS.ink4 : P_COLORS.ink }}>{t.title}</div>
-              {t.priority === 'high' && <PPill kind="priority">High</PPill>}
-              {t.priority === 'easy' && <PPill kind="easy">Easy</PPill>}
+              <PPill kind={effortPillKind(t.priority)}>{effortLabel(t.priority)}</PPill>
             </div>
           ))}
         </PCard>

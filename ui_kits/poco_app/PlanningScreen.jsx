@@ -2,7 +2,7 @@
 
 function PlanningScreen({ onDone }) {
   const { state, toggleToday } = useStore();
-  const open = state.tasks.filter(t => !t.done);
+  const open = sortTasksForEnergy(state.tasks.filter(t => !t.done), state.mood.energy);
   const todayTasks = open.filter(t => t.today);
   const otherTasks = open.filter(t => !t.today);
 
@@ -86,8 +86,7 @@ function PlanRow({ task, index, total, focused, onToggle }) {
           </div>
         )}
       </div>
-      {task.priority === 'high' && <PPill kind="priority">High</PPill>}
-      {task.priority === 'easy' && <PPill kind="easy">Easy</PPill>}
+      <PPill kind={effortPillKind(task.priority)}>{effortLabel(task.priority)}</PPill>
     </div>
   );
 }

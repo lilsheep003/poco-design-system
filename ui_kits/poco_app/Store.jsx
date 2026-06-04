@@ -15,14 +15,47 @@ const FRICTION_TAGS = [
   'Unclear what to do',
 ];
 
+const EFFORT_LEVELS = [
+  { id: 'easy', label: 'Easy', rank: 0, pill: 'easy' },
+  { id: 'medium', label: 'Medium', rank: 1, pill: 'medium' },
+  { id: 'hard', label: 'Hard', rank: 2, pill: 'hard' },
+];
+
+function normalizeEffort(value) {
+  if (value === 'easy') return 'easy';
+  if (value === 'hard' || value === 'high') return 'hard';
+  return 'medium';
+}
+
+function effortLabel(value) {
+  return EFFORT_LEVELS.find(x => x.id === normalizeEffort(value))?.label || 'Medium';
+}
+
+function effortPillKind(value) {
+  return EFFORT_LEVELS.find(x => x.id === normalizeEffort(value))?.pill || 'medium';
+}
+
+function effortRank(value) {
+  return EFFORT_LEVELS.find(x => x.id === normalizeEffort(value))?.rank ?? 1;
+}
+
+function sortTasksForEnergy(tasks, energy) {
+  const list = [...tasks];
+  if (energy !== 'Low') return list;
+  return list
+    .map((task, index) => ({ task, index }))
+    .sort((a, b) => effortRank(a.task.priority) - effortRank(b.task.priority) || a.index - b.index)
+    .map(x => x.task);
+}
+
 function makeInitialStore() {
   return {
     tasks: [
-      { id: uid(), title: 'Review paper', done: true,  priority: 'high', done_ts: Date.now() - 3600_000, subtasks: [], friction: null, today: false },
-      { id: uid(), title: 'Read two papers', done: false, priority: 'high', subtasks: [], friction: null, today: true },
+      { id: uid(), title: 'Review paper', done: true,  priority: 'hard', done_ts: Date.now() - 3600_000, subtasks: [], friction: null, today: false },
+      { id: uid(), title: 'Read two papers', done: false, priority: 'hard', subtasks: [], friction: null, today: true },
       { id: uid(), title: 'Reply to email', done: true,  priority: 'easy', done_ts: Date.now() - 7200_000, subtasks: [], friction: null, today: false },
-      { id: uid(), title: 'Organize tax document', done: false, priority: 'easy', subtasks: [], friction: null, today: false },
-      { id: uid(), title: 'Write planning report', done: false, priority: 'high', today: true,
+      { id: uid(), title: 'Organize tax document', done: false, priority: 'medium', subtasks: [], friction: null, today: false },
+      { id: uid(), title: 'Write planning report', done: false, priority: 'hard', today: true,
         friction: "Don't know where to start",
         subtasks: [
           { id: uid(), text: 'Open the course page and read the assignment instructions', done: false },
@@ -71,6 +104,13 @@ function saveStore(state) {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (_) {}
 }
 
+function withTaskCompletionFromSubtasks(task) {
+  const subtasks = Array.isArray(task.subtasks) ? task.subtasks : [];
+  if (subtasks.length === 0) return { ...task, subtasks };
+  const allDone = subtasks.every(s => s.done);
+  return { ...task, subtasks, done: allDone, done_ts: allDone ? (task.done_ts || Date.now()) : null };
+}
+
 function StoreProvider({ children }) {
   const [s, setS] = React.useState(() => loadStore() || makeInitialStore());
 
@@ -80,11 +120,16 @@ function StoreProvider({ children }) {
     state: s,
 
     // TASKS
-    addTask: (title, priority='high') => setS(p => ({ ...p, tasks: [{ id: uid(), title, done: false, priority, subtasks: [], friction: null, today: false }, ...p.tasks] })),
-    addTaskFull: (task) => setS(p => ({ ...p, tasks: [{ id: uid(), done: false, priority: 'high', subtasks: [], friction: null, today: false, source: 'manual', ...task }, ...p.tasks] })),
+    addTask: (title, priority='medium') => setS(p => ({ ...p, tasks: [{ id: uid(), title, done: false, priority: normalizeEffort(priority), subtasks: [], friction: null, today: false }, ...p.tasks] })),
+    addTaskFull: (task) => setS(p => ({ ...p, tasks: [{ id: uid(), done: false, priority: 'medium', subtasks: [], friction: null, today: false, source: 'manual', ...task, priority: normalizeEffort(task.priority) }, ...p.tasks] })),
     toggleToday: (id) => setS(p => ({ ...p, tasks: p.tasks.map(t => t.id === id ? { ...t, today: !t.today } : t) })),
     updateTask: (id, patch) => setS(p => ({ ...p, tasks: p.tasks.map(t => t.id === id ? { ...t, ...patch } : t) })),
-    toggleTask: (id) => setS(p => ({ ...p, tasks: p.tasks.map(t => t.id === id ? { ...t, done: !t.done, done_ts: !t.done ? Date.now() : null } : t) })),
+    toggleTask: (id) => setS(p => ({ ...p, tasks: p.tasks.map(t => {
+      if (t.id !== id) return t;
+      const nextDone = !t.done;
+      const subtasks = Array.isArray(t.subtasks) ? t.subtasks.map(s => ({ ...s, done: nextDone })) : [];
+      return { ...t, done: nextDone, done_ts: nextDone ? Date.now() : null, subtasks };
+    }) })),
     deleteTask: (id) => setS(p => ({ ...p, tasks: p.tasks.filter(t => t.id !== id) })),
     moveTask: (id, dir) => setS(p => {
       const i = p.tasks.findIndex(t => t.id === id);
@@ -95,9 +140,21 @@ function StoreProvider({ children }) {
       [tasks[i], tasks[j]] = [tasks[j], tasks[i]];
       return { ...p, tasks };
     }),
-    addSubtask: (taskId, text) => setS(p => ({ ...p, tasks: p.tasks.map(t => t.id === taskId ? { ...t, subtasks: [...t.subtasks, { id: uid(), text, done: false }] } : t) })),
-    updateSubtask: (taskId, subId, patch) => setS(p => ({ ...p, tasks: p.tasks.map(t => t.id === taskId ? { ...t, subtasks: t.subtasks.map(x => x.id === subId ? { ...x, ...patch } : x) } : t) })),
-    deleteSubtask: (taskId, subId) => setS(p => ({ ...p, tasks: p.tasks.map(t => t.id === taskId ? { ...t, subtasks: t.subtasks.filter(x => x.id !== subId) } : t) })),
+    addSubtask: (taskId, text) => setS(p => ({ ...p, tasks: p.tasks.map(t => {
+      if (t.id !== taskId) return t;
+      const subtasks = Array.isArray(t.subtasks) ? t.subtasks : [];
+      return { ...t, done: false, done_ts: null, subtasks: [...subtasks, { id: uid(), text, done: false }] };
+    }) })),
+    updateSubtask: (taskId, subId, patch) => setS(p => ({ ...p, tasks: p.tasks.map(t => {
+      if (t.id !== taskId) return t;
+      const subtasks = (Array.isArray(t.subtasks) ? t.subtasks : []).map(x => x.id === subId ? { ...x, ...patch } : x);
+      return withTaskCompletionFromSubtasks({ ...t, subtasks });
+    }) })),
+    deleteSubtask: (taskId, subId) => setS(p => ({ ...p, tasks: p.tasks.map(t => {
+      if (t.id !== taskId) return t;
+      const subtasks = (Array.isArray(t.subtasks) ? t.subtasks : []).filter(x => x.id !== subId);
+      return subtasks.length > 0 ? withTaskCompletionFromSubtasks({ ...t, subtasks }) : { ...t, subtasks };
+    }) })),
 
     // MIND DROPS
     addMindDrop: (text) => setS(p => ({ ...p, mindDrops: [{ id: uid(), text, createdAt: Date.now() }, ...p.mindDrops] })),
@@ -108,7 +165,7 @@ function StoreProvider({ children }) {
       return {
         ...p,
         mindDrops: p.mindDrops.filter(d => d.id !== id),
-        tasks: [{ id: uid(), title: drop.text, done: false, priority: 'high', subtasks: [], friction: null, today: false }, ...p.tasks],
+        tasks: [{ id: uid(), title: drop.text, done: false, priority: 'medium', subtasks: [], friction: null, today: false }, ...p.tasks],
       };
     }),
 
@@ -131,4 +188,4 @@ function StoreProvider({ children }) {
 
 const useStore = () => React.useContext(StoreCtx);
 
-Object.assign(window, { StoreProvider, useStore, FRICTION_TAGS, uid });
+Object.assign(window, { StoreProvider, useStore, FRICTION_TAGS, EFFORT_LEVELS, normalizeEffort, effortLabel, effortPillKind, sortTasksForEnergy, uid });

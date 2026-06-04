@@ -1,21 +1,24 @@
 // Tasks — capture thoughts, breakdown, mind drop & planning entries, filter, list.
 
 function TaskScreen({ onOpenBreakdown, onOpenFocus, onOpenMindDrop, onOpenPlanning }) {
-  const { state, addMindDrop, toggleTask, deleteTask, updateTask, moveTask } = useStore();
+  const { state, addMindDrop, toggleTask, deleteTask, updateTask, moveTask, updateSubtask } = useStore();
   const [filter, setFilter] = React.useState('all');
   const [text, setText] = React.useState('');
   const [editingId, setEditingId] = React.useState(null);
   const [editText, setEditText] = React.useState('');
+  const [expandedId, setExpandedId] = React.useState(null);
 
   const filtered = state.tasks.filter(t => {
     if (filter === 'all') return true;
     if (filter === 'open') return !t.done;
     if (filter === 'done') return t.done;
-    if (filter === 'high') return t.priority === 'high';
-    if (filter === 'easy') return t.priority === 'easy';
+    if (filter === 'easy') return normalizeEffort(t.priority) === 'easy';
+    if (filter === 'medium') return normalizeEffort(t.priority) === 'medium';
+    if (filter === 'hard') return normalizeEffort(t.priority) === 'hard';
     if (filter === 'today') return t.today && !t.done;
     return true;
   });
+  const visibleTasks = sortTasksForEnergy(filtered, state.mood.energy);
 
   const saveDrop = () => {
     const v = text.trim();
@@ -83,41 +86,35 @@ function TaskScreen({ onOpenBreakdown, onOpenFocus, onOpenMindDrop, onOpenPlanni
       {/* Filter */}
       <PSection>
         <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
-          {[['all','All'],['today','Today'],['open','Open'],['done','Done'],['high','High'],['easy','Easy']].map(([k, l]) => (
+          {[['all','All'],['today','Today'],['open','Open'],['done','Done'],['easy','Easy'],['medium','Medium'],['hard','Hard']].map(([k, l]) => (
             <PChip key={k} active={filter === k} onClick={() => setFilter(k)}>{l}</PChip>
           ))}
         </div>
       </PSection>
 
-      <PSection title={`${filtered.length} ${filter === 'all' ? 'tasks' : filter}`}>
+      <PSection title={`${visibleTasks.length} ${filter === 'all' ? 'tasks' : filter}`}>
         <PCard style={{ padding: 6 }}>
-          {filtered.length === 0 && (
+          {visibleTasks.length === 0 && (
             <div style={{ padding: 20, textAlign: 'center', color: P_COLORS.ink3, fontSize: 14 }}>Nothing here yet.</div>
           )}
-          {filtered.map((t, i) => (
-            <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderBottom: i < filtered.length - 1 ? `1px solid ${P_COLORS.line}` : 'none' }}>
-              <CheckDot done={t.done} onClick={() => toggleTask(t.id)} />
-              {editingId === t.id ? (
-                <input autoFocus value={editText} onChange={e => setEditText(e.target.value)}
-                  onBlur={() => { updateTask(t.id, { title: editText.trim() || t.title }); setEditingId(null); }}
-                  onKeyDown={e => { if (e.key === 'Enter') { updateTask(t.id, { title: editText.trim() || t.title }); setEditingId(null); } }}
-                  style={{ flex: 1, border: 0, borderBottom: `1px solid ${P_COLORS.ink}`, background: 'transparent', fontSize: 14, fontFamily: P_FONT, outline: 'none' }} />
-              ) : (
-                <div onClick={() => { setEditingId(t.id); setEditText(t.title); }}
-                  style={{ flex: 1, fontSize: 14, fontWeight: 500, textDecoration: t.done ? 'line-through' : 'none', color: t.done ? P_COLORS.ink4 : P_COLORS.ink, cursor: 'text' }}>
-                  {t.title}
-                  {t.subtasks.length > 0 && <span style={{ fontSize: 11, color: P_COLORS.ink3, marginLeft: 8 }}>{t.subtasks.filter(s=>s.done).length}/{t.subtasks.length}</span>}
-                  {t.today && !t.done && <span style={{ fontSize: 11, color: P_COLORS.progress, marginLeft: 6 }}>· today</span>}
-                </div>
-              )}
-              {t.priority === 'high' && <PPill kind="priority">High</PPill>}
-              {t.priority === 'easy' && <PPill kind="easy">Easy</PPill>}
-              <div style={{ display: 'flex', gap: 2 }}>
-                <button onClick={() => moveTask(t.id, -1)} style={miniBtn}>↑</button>
-                <button onClick={() => moveTask(t.id, 1)} style={miniBtn}>↓</button>
-                <button onClick={() => deleteTask(t.id)} style={miniBtn}>×</button>
-              </div>
-            </div>
+          {visibleTasks.map((t, i) => (
+            <TaskRow
+              key={t.id}
+              task={t}
+              isLast={i === visibleTasks.length - 1}
+              expanded={expandedId === t.id}
+              editing={editingId === t.id}
+              editText={editText}
+              setEditText={setEditText}
+              onStartEdit={() => { setEditingId(t.id); setEditText(t.title); }}
+              onFinishEdit={() => { updateTask(t.id, { title: editText.trim() || t.title }); setEditingId(null); }}
+              onToggleDone={() => toggleTask(t.id)}
+              onToggleExpanded={() => setExpandedId(expandedId === t.id ? null : t.id)}
+              onMove={(dir) => moveTask(t.id, dir)}
+              onDelete={() => { deleteTask(t.id); if (expandedId === t.id) setExpandedId(null); }}
+              onToggleSubtask={(subtask) => updateSubtask(t.id, subtask.id, { done: !subtask.done })}
+              onChangeEffort={(effort) => updateTask(t.id, { priority: effort })}
+            />
           ))}
         </PCard>
       </PSection>
@@ -125,6 +122,168 @@ function TaskScreen({ onOpenBreakdown, onOpenFocus, onOpenMindDrop, onOpenPlanni
   );
 }
 
-const miniBtn = { border: 0, background: 'transparent', color: '#9A9A9A', width: 22, height: 22, borderRadius: 6, cursor: 'pointer', fontSize: 14 };
+function TaskRow({
+  task,
+  isLast,
+  expanded,
+  editing,
+  editText,
+  setEditText,
+  onStartEdit,
+  onFinishEdit,
+  onToggleDone,
+  onToggleExpanded,
+  onMove,
+  onDelete,
+  onToggleSubtask,
+  onChangeEffort,
+}) {
+  const subtasks = Array.isArray(task.subtasks) ? task.subtasks : [];
+  const hasSubtasks = subtasks.length > 0;
+  const doneCount = subtasks.filter(s => s.done).length;
+
+  return (
+    <div style={{ borderBottom: isLast ? 'none' : `1px solid ${P_COLORS.line}` }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px' }}>
+        <CheckDot done={task.done} onClick={onToggleDone} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {editing ? (
+            <input autoFocus value={editText} onChange={e => setEditText(e.target.value)}
+              onBlur={onFinishEdit}
+              onKeyDown={e => { if (e.key === 'Enter') onFinishEdit(); if (e.key === 'Escape') onFinishEdit(); }}
+              style={{ width: '100%', border: 0, borderBottom: `1px solid ${P_COLORS.ink}`, background: 'transparent', fontSize: 14, fontFamily: P_FONT, outline: 'none' }} />
+          ) : (
+            <div onClick={onStartEdit}
+              style={{ fontSize: 14, fontWeight: 500, textDecoration: task.done ? 'line-through' : 'none', color: task.done ? P_COLORS.ink4 : P_COLORS.ink, cursor: 'text', lineHeight: 1.35 }}>
+              {task.title}
+            </div>
+          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+            <EffortSelect value={normalizeEffort(task.priority)} onChange={onChangeEffort} />
+            {task.today && !task.done && <span style={{ fontSize: 11, color: P_COLORS.progress }}>today</span>}
+          </div>
+        </div>
+        {hasSubtasks && (
+          <button
+            onClick={onToggleExpanded}
+            aria-label={expanded ? 'Hide steps' : 'Show steps'}
+            style={{
+              border: `1px solid ${expanded ? P_COLORS.ink : P_COLORS.lineStrong}`,
+              background: expanded ? P_COLORS.ink : P_COLORS.page,
+              color: expanded ? '#fff' : P_COLORS.ink3,
+              borderRadius: 999,
+              padding: '5px 8px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              fontFamily: P_FONT,
+              fontSize: 11,
+              fontWeight: 700,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {doneCount}/{subtasks.length}
+            <PIcon name={expanded ? 'chevron-left' : 'chevron-right'} size={13} stroke={expanded ? '#fff' : P_COLORS.ink3} sw={2} />
+          </button>
+        )}
+        <div style={{ display: 'flex', gap: 2 }}>
+          <button onClick={() => onMove(-1)} style={taskMiniBtn}>↑</button>
+          <button onClick={() => onMove(1)} style={taskMiniBtn}>↓</button>
+          <button onClick={onDelete} style={taskMiniBtn}>×</button>
+        </div>
+      </div>
+
+      {expanded && hasSubtasks && (
+        <div style={{ margin: '0 12px 12px 44px', border: `1px solid ${P_COLORS.line}`, borderRadius: 16, background: P_COLORS.page, overflow: 'hidden' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, padding: '10px 12px', background: P_COLORS.surface1, borderBottom: `1px solid ${P_COLORS.line}` }}>
+            <div style={{ fontSize: 12, color: P_COLORS.ink3, fontWeight: 700 }}>small steps</div>
+            <div style={{ fontSize: 12, color: P_COLORS.ink3, fontWeight: 700 }}>{doneCount} of {subtasks.length} done</div>
+          </div>
+          {subtasks.map((subtask, index) => (
+            <button
+              key={subtask.id}
+              onClick={() => onToggleSubtask(subtask)}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 10,
+                padding: '11px 12px',
+                border: 0,
+                borderBottom: index < subtasks.length - 1 ? `1px solid ${P_COLORS.line}` : 'none',
+                background: 'transparent',
+                color: P_COLORS.ink,
+                fontFamily: P_FONT,
+                textAlign: 'left',
+                cursor: 'pointer',
+              }}
+            >
+              <StepDot done={subtask.done} />
+              <span style={{
+                flex: 1,
+                fontSize: 13,
+                lineHeight: 1.45,
+                color: subtask.done ? P_COLORS.ink4 : P_COLORS.ink,
+                textDecoration: subtask.done ? 'line-through' : 'none',
+              }}>
+                {subtask.text}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EffortSelect({ value, onChange }) {
+  return (
+    <select
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      aria-label="Task effort"
+      style={{
+        border: `1px solid ${P_COLORS.lineStrong}`,
+        background: P_COLORS.page,
+        color: P_COLORS.ink2,
+        borderRadius: 999,
+        padding: '3px 8px',
+        fontFamily: P_FONT,
+        fontSize: 11,
+        fontWeight: 700,
+        outline: 'none',
+        cursor: 'pointer',
+      }}
+    >
+      {EFFORT_LEVELS.map(level => (
+        <option key={level.id} value={level.id}>{level.label}</option>
+      ))}
+    </select>
+  );
+}
+
+function StepDot({ done }) {
+  return (
+    <span style={{
+      width: 18,
+      height: 18,
+      borderRadius: 999,
+      border: `1.5px solid ${done ? P_COLORS.ink : P_COLORS.ink4}`,
+      background: done ? P_COLORS.ink : P_COLORS.page,
+      color: '#fff',
+      display: 'grid',
+      placeItems: 'center',
+      flexShrink: 0,
+      marginTop: 1,
+      fontSize: 12,
+      lineHeight: 1,
+    }}>
+      {done ? '✓' : ''}
+    </span>
+  );
+}
+
+const taskMiniBtn = { border: 0, background: 'transparent', color: '#9A9A9A', width: 22, height: 22, borderRadius: 6, cursor: 'pointer', fontSize: 14 };
 
 Object.assign(window, { TaskScreen });
